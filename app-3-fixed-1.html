@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سامانه رزرو سالن ورزشی</title>
+<style>
+  :root{
+    --primary:#2563eb;
+    --primary-dark:#1d4ed8;
+    --bg:#f8fafc;
+    --card:#ffffff;
+    --text:#0f172a;
+    --muted:#64748b;
+    --border:#e2e8f0;
+    --success:#16a34a;
+    --warn:#b45309;
+    --danger:#dc2626;
+    --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Vazirmatn', Tahoma, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+  }
+  header{
+    background:var(--card);
+    border-bottom:1px solid var(--border);
+    padding:16px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+  header h1{font-size:17px; font-weight:700;}
+  header .badge{
+    font-size:12px; background:#eef2ff; color:var(--primary);
+    padding:4px 10px; border-radius:20px; white-space:nowrap;
+  }
+  main{
+    max-width:600px;
+    width:100%;
+    margin:0 auto;
+    padding:20px 16px 60px;
+  }
+  .section-title{
+    font-size:15px; font-weight:700; margin:24px 0 10px;
+  }
+  .section-desc{
+    font-size:12.5px; color:var(--muted); margin-bottom:14px; line-height:1.9;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .stat-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:10px;
+  }
+  .stat-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px 8px;
+    text-align:center;
+  }
+  .stat-card .num{font-size:20px; font-weight:800; color:var(--primary);}
+  .stat-card .label{font-size:11px; color:var(--muted); margin-top:4px;}
+  .row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:9px 0;
+    border-bottom:1px solid var(--border);
+    font-size:13px;
+  }
+  .row:last-child{border-bottom:none;}
+  .row .k{color:var(--muted);}
+  .row .v{font-weight:600; direction:ltr;}
+  .btn{
+    display:inline-block;
+    background:var(--primary);
+    color:#fff;
+    border:none;
+    padding:11px 16px;
+    border-radius:10px;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .btn:hover{background:var(--primary-dark);}
+  .btn.danger{background:var(--danger);}
+  .btn.secondary{background:transparent; color:var(--primary); border:1px solid var(--primary);}
+  .status-pill{
+    display:inline-block;
+    font-size:11px;
+    padding:3px 10px;
+    border-radius:20px;
+    font-weight:600;
+    background:#dcfce7; color:var(--success);
+  }
+  pre{
+    background:#0f172a;
+    color:#e2e8f0;
+    padding:14px;
+    border-radius:10px;
+    font-size:11px;
+    overflow-x:auto;
+    direction:ltr;
+    text-align:left;
+    max-height:260px;
+    overflow-y:auto;
+  }
+  .footer-note{
+    font-size:11px;
+    color:var(--muted);
+    text-align:center;
+    margin-top:24px;
+    line-height:2;
+  }
+  .btn-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;}
+  .hidden{display:none !important;}
+
+  /* ---------- Auth ---------- */
+  .role-tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .role-tab{
+    flex:1;
+    text-align:center;
+    padding:10px 4px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:var(--card);
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    color:var(--muted);
+  }
+  .role-tab.active{
+    background:var(--primary);
+    color:#fff;
+    border-color:var(--primary);
+  }
+  .form-group{margin-bottom:14px;}
+  .form-group label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    margin-bottom:6px;
+    color:var(--text);
+  }
+  .form-group input{
+    width:100%;
+    padding:12px 14px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    font-size:14px;
+    font-family:inherit;
+    direction:rtl;
+  }
+  .form-group input:focus{outline:none; border-color:var(--primary);}
+  .error-msg{
+    background:#fef2f2;
+    color:var(--danger);
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:12.5px;
+    margin-bottom:12px;
+    display:none;
+  }
+  .error-msg.show{display:block;}
+  .hint-box{
+    background:#f1f5f9;
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:11.5px;
+    color:var(--muted);
+    margin-top:14px;
+    line-height:1.9;
+  }
+  .user-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    margin-bottom:16px;
+  }
+  .user-bar .info{font-size:13px;}
+  .user-bar .info .name{font-weight:700;}
+  .user-bar .info .role{font-size:11px; color:var(--muted);}
+  .btn-sm{
+    padding:7px 14px;
+    font-size:12px;
+    border-radius:8px;
+  }
+  .welcome-card{
+    text-align:center;
+    padding:36px 16px;
+  }
+  .welcome-card .emoji{font-size:44px; margin-bottom:12px;}
+  .welcome-card h2{font-size:17px; margin-bottom:8px;}
+  .welcome-card p{font-size:12.5px; color:var(--muted); line-height:1.9;}
+
+  /* ---------- Admin Panel ---------- */
+  .admin-tabs{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    padding-bottom:4px;
+    margin-bottom:16px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .admin-tabs::-webkit-scrollbar{display:none;}
+  .admin-tab{
+    flex-shrink:0;
+    padding:9px 14px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:var(--card);
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  .admin-tab.active{
+    background:var(--primary);
+    color:#fff;
+    border-color:var(--primary);
+  }
+  .list-item{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    margin-bottom:10px;
+  }
+  .list-item .top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:6px;
+  }
+  .list-item .title{font-size:14px; font-weight:700;}
+  .list-item .sub{font-size:11.5px; color:var(--muted); margin-top:2px;}
+  .list-item .meta-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:8px;
+  }
+  .chip{
+    font-size:10.5px;
+    padding:3px 9px;
+    border-radius:20px;
+    background:#f1f5f9;
+    color:var(--muted);
+    font-weight:600;
+  }
+  .chip.status-temporary{background:#fef3c7; color:var(--warn);}
+  .chip.status-confirmed{background:#dcfce7; color:var(--success);}
+  .chip.status-cancelled{background:#fee2e2; color:var(--danger);}
+  .chip.pay-waiting_receipt{background:#f1f5f9; color:var(--muted);}
+  .chip.pay-receipt_submitted{background:#dbeafe; color:var(--primary);}
+  .chip.pay-receipt_approved{background:#dcfce7; color:var(--success);}
+  .chip.pay-receipt_rejected{background:#fee2e2; color:var(--danger);}
+  .list-item .actions{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+  }
+  .empty-state{
+    text-align:center;
+    padding:36px 16px;
+    color:var(--muted);
+    font-size:12.5px;
+  }
+  .empty-state .emoji{font-size:32px; margin-bottom:10px; display:block;}
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(15,23,42,0.5);
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:50;
+  }
+  .modal-box{
+    background:var(--card);
+    width:100%;
+    max-width:480px;
+    border-radius:20px 20px 0 0;
+    padding:20px 18px 26px;
+    max-height:85vh;
+    overflow-y:auto;
+  }
+  .modal-title{
+    font-size:15px;
+    font-weight:700;
+    margin-bottom:16px;
+  }
+
+  /* ---------- Owner Panel ---------- */
+  .image-upload-box{
+    border:2px dashed var(--border);
+    border-radius:12px;
+    padding:16px;
+    text-align:center;
+    cursor:pointer;
+    background:#f8fafc;
+    position:relative;
+    overflow:hidden;
+  }
+  .image-upload-box img{
+    max-width:100%;
+    max-height:140px;
+    border-radius:8px;
+    display:block;
+    margin:0 auto;
+  }
+  .image-upload-box .placeholder-text{
+    font-size:12px;
+    color:var(--muted);
+  }
+  .image-upload-box input[type=file]{
+    position:absolute;
+    inset:0;
+    opacity:0;
+    cursor:pointer;
+  }
+  .facility-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:8px;
+  }
+  .facility-tag{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:#eef2ff;
+    color:var(--primary);
+    padding:5px 10px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+  }
+  .facility-tag .remove{
+    cursor:pointer;
+    font-weight:800;
+    color:var(--danger);
+  }
+  .facility-input-row{
+    display:flex;
+    gap:8px;
+  }
+  .facility-input-row input{flex:1;}
+  .venue-card-image{
+    width:100%;
+    height:130px;
+    border-radius:10px;
+    object-fit:cover;
+    background:#e2e8f0;
+    margin-bottom:10px;
+  }
+  .venue-card-image-placeholder{
+    width:100%;
+    height:100px;
+    border-radius:10px;
+    background:#e2e8f0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+    margin-bottom:10px;
+  }
+
+  /* ---------- Slots (سانس‌ها) ---------- */
+  .back-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12.5px;
+    color:var(--primary);
+    cursor:pointer;
+    margin-bottom:14px;
+    font-weight:600;
+  }
+  .slot-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:12px 14px;
+    margin-bottom:8px;
+  }
+  .slot-row .info{font-size:13px;}
+  .slot-row .info .date{font-weight:700;}
+  .slot-row .info .time{font-size:11.5px; color:var(--muted); direction:ltr; text-align:right;}
+  .slot-row .side{display:flex; align-items:center; gap:8px;}
+  .grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🗄️ سامانه رزرو سالن ورزشی</h1>
+  <span class="badge" id="headerBadge">فاز ۴ — پنل مدیر</span>
+</header>
+
+<main>
+
+  <!-- ===================== صفحات ورود (Auth Pages) ===================== -->
+  <div id="authPages"></div>
+
+  <!-- ===================== محتوای بعد از ورود ===================== -->
+  <div id="appPages" class="hidden"></div>
+
+  <!-- ===================== پنل دیباگ دیتابیس (فقط مدیر) ===================== -->
+  <div id="dbDebugSection" class="hidden">
+    <div class="section-title">📊 وضعیت کلی دیتابیس</div>
+    <div class="stat-grid" id="statGrid"></div>
+
+    <div class="section-title">📋 جداول</div>
+    <div class="card" id="tablesCard"></div>
+
+    <div class="section-title">🛠️ ابزار دیباگ</div>
+    <div class="card">
+      <div class="btn-row">
+        <button class="btn secondary" onclick="reseed()">بازسازی داده اولیه</button>
+        <button class="btn danger" onclick="wipeAll()">پاک‌کردن کامل داده‌ها</button>
+      </div>
+    </div>
+
+    <div class="section-title">🧾 خروجی JSON دیتابیس</div>
+    <pre id="jsonPreview"></pre>
+  </div>
+
+  <p class="footer-note">
+    فاز ۴: پنل مدیر (مدیریت صاحبان سالن، مشاهده سالن‌ها، ورزشکاران، رزروها، پرداخت‌ها و رسیدها).<br>
+    داده‌ها فقط روی همین مرورگر/گوشی ذخیره می‌شوند (بدون سرور).
+  </p>
+
+</main>
+
+<!-- ===================== مودال ایجاد/ویرایش صاحب سالن ===================== -->
+<div id="ownerModalOverlay" class="modal-overlay hidden" onclick="closeOwnerModalOutside(event)">
+  <div class="modal-box">
+    <div class="modal-title" id="ownerModalTitle">ایجاد صاحب سالن</div>
+    <div class="form-group">
+      <label>نام و نام خانوادگی</label>
+      <input type="text" id="ownerFullName" placeholder="مثلاً: رضا محمدی">
+    </div>
+    <div class="form-group">
+      <label>نام کاربری</label>
+      <input type="text" id="ownerUsername" placeholder="نام کاربری منحصربه‌فرد" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label id="ownerPasswordLabel">رمز عبور</label>
+      <input type="text" id="ownerPassword" placeholder="رمز عبور" autocomplete="off">
+    </div>
+    <div class="error-msg" id="ownerModalError"></div>
+    <div class="btn-row">
+      <button class="btn" style="flex:1;" onclick="submitOwnerModal()">ذخیره</button>
+      <button class="btn secondary" style="flex:1;" onclick="closeOwnerModal()">انصراف</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== مودال ایجاد/ویرایش سالن (صاحب سالن) ===================== -->
+<div id="venueModalOverlay" class="modal-overlay hidden" onclick="closeVenueModalOutside(event)">
+  <div class="modal-box">
+    <div class="modal-title" id="venueModalTitle">ایجاد سالن جدید</div>
+
+    <div class="form-group">
+      <label>تصویر سالن</label>
+      <div class="image-upload-box" id="venueImageBox">
+        <span class="placeholder-text" id="venueImagePlaceholder">برای انتخاب عکس ضربه بزنید</span>
+        <img id="venueImagePreview" class="hidden">
+        <input type="file" accept="image/*" id="venueImageInput" onchange="handleVenueImageSelect(event)">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>نام سالن</label>
+      <input type="text" id="venueName" placeholder="مثلاً: سالن ورزشی ستاره">
+    </div>
+    <div class="form-group">
+      <label>آدرس</label>
+      <input type="text" id="venueAddress" placeholder="آدرس کامل سالن">
+    </div>
+    <div class="form-group">
+      <label>شماره تماس</label>
+      <input type="tel" id="venuePhone" placeholder="02122223333" inputmode="numeric">
+    </div>
+    <div class="form-group">
+      <label>قیمت هر سانس (تومان)</label>
+      <input type="number" id="venuePrice" placeholder="350000" inputmode="numeric">
+    </div>
+    <div class="form-group">
+      <label>امکانات</label>
+      <div class="facility-input-row">
+        <input type="text" id="venueFacilityInput" placeholder="مثلاً: پارکینگ">
+        <button class="btn secondary btn-sm" onclick="addFacilityTag()">افزودن</button>
+      </div>
+      <div class="facility-tags" id="venueFacilityTags"></div>
+    </div>
+
+    <div class="error-msg" id="venueModalError"></div>
+    <div class="btn-row">
+      <button class="btn" style="flex:1;" onclick="submitVenueModal()">ذخیره</button>
+      <button class="btn secondary" style="flex:1;" onclick="closeVenueModal()">انصراف</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==========================================================
+   لایه داده (Data Layer) — شبیه‌سازی دیتابیس با localStorage
+   فاز ۲: فقط Schema، مدل‌ها، Relationships، Constraints، Seed
+   ========================================================== */
+
+const DB_KEY = 'venue_booking_db_v1';
+
+const EMPTY_DB = {
+  meta: { version: 1, createdAt: null },
+  users: [],            // { id, role: 'owner'|'admin', username, passwordHash, createdAt }
+  athletes: [],         // { id, name, phone, createdAt }
+  venueOwners: [],      // { id, userId, fullName, cardNumber, createdAt }
+  venues: [],           // { id, ownerId, name, address, phone, price, image, facilities:[], createdAt }
+  timeSlots: [],        // { id, venueId, date, startTime, endTime, status: 'available'|'reserved' }
+  bookings: [],         // { id, athleteId, venueId, timeSlotId, price, bookingStatus, paymentStatus, createdAt }
+  payments: [],         // { id, bookingId, amount, status, createdAt }
+  paymentReceipts: [],  // { id, bookingId, image, submittedAt, status }
+  notifications: [],    // { id, userType, userId, message, type, read, createdAt }
+  _autoIncrement: {
+    users:1, athletes:1, venueOwners:1, venues:1, timeSlots:1,
+    bookings:1, payments:1, paymentReceipts:1, notifications:1
+  }
+};
+
+// ---------- توابع پایه دیتابیس ----------
+function loadDB(){
+  const raw = localStorage.getItem(DB_KEY);
+  if(!raw) return null;
+  try{ return JSON.parse(raw); }catch(e){ return null; }
+}
+
+function saveDB(db){
+  localStorage.setItem(DB_KEY, JSON.stringify(db));
+}
+
+function nextId(db, table){
+  const id = db._autoIncrement[table]++;
+  return id;
+}
+
+// شبیه‌سازی هش ساده (فقط برای دمو — نه امن برای Production واقعی)
+function simpleHash(str){
+  let hash = 0;
+  for(let i=0; i<str.length; i++){
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return 'h' + Math.abs(hash).toString(16);
+}
+
+// ---------- Seed ----------
+function createSeed(){
+  const db = JSON.parse(JSON.stringify(EMPTY_DB));
+  db.meta.createdAt = new Date().toISOString();
+
+  // مدیر اصلی
+  const adminId = nextId(db, 'users');
+  db.users.push({
+    id: adminId, role: 'admin', username: 'admin',
+    passwordHash: simpleHash('admin123'), createdAt: new Date().toISOString()
+  });
+
+  // صاحب سالن نمونه
+  const ownerUserId = nextId(db, 'users');
+  db.users.push({
+    id: ownerUserId, role: 'owner', username: 'owner1',
+    passwordHash: simpleHash('owner123'), createdAt: new Date().toISOString()
+  });
+  const ownerId = nextId(db, 'venueOwners');
+  db.venueOwners.push({
+    id: ownerId, userId: ownerUserId, fullName: 'رضا محمدی',
+    cardNumber: '6037-1234-5678-9012', createdAt: new Date().toISOString()
+  });
+
+  // سالن نمونه
+  const venueId = nextId(db, 'venues');
+  db.venues.push({
+    id: venueId, ownerId: ownerId, name: 'سالن ورزشی ستاره',
+    address: 'تهران، خیابان ولیعصر، پلاک ۱۲', phone: '02122223333',
+    price: 350000, image: '', facilities: ['پارکینگ', 'رختکن', 'سرویس بهداشتی'],
+    createdAt: new Date().toISOString()
+  });
+
+  // سانس‌های نمونه
+  const today = new Date();
+  const d1 = new Date(today); d1.setDate(d1.getDate()+1);
+  const d2 = new Date(today); d2.setDate(d2.getDate()+2);
+  const fmt = (d)=> d.toISOString().split('T')[0];
+
+  db.timeSlots.push({
+    id: nextId(db, 'timeSlots'), venueId: venueId, date: fmt(d1),
+    startTime: '18:00', endTime: '19:00', status: 'available'
+  });
+  db.timeSlots.push({
+    id: nextId(db, 'timeSlots'), venueId: venueId, date: fmt(d2),
+    startTime: '20:00', endTime: '21:00', status: 'available'
+  });
+
+  saveDB(db);
+  return db;
+}
+
+function ensureDB(){
+  let db = loadDB();
+  if(!db){
+    db = createSeed();
+  }
+  return db;
+}
+
+function reseed(){
+  if(!confirm('داده‌های فعلی حذف و داده اولیه دوباره ساخته می‌شود. ادامه می‌دهید؟')) return;
+  createSeed();
+  renderApp();
+}
+
+function wipeAll(){
+  if(!confirm('تمام داده‌ها برای همیشه پاک می‌شوند. مطمئن هستید؟')) return;
+  localStorage.removeItem(DB_KEY);
+  ensureDB();
+  renderApp();
+}
+
+// ---------- جداول (برای پنل دیباگ دیتابیس) ----------
+const TABLE_LABELS = {
+  users: 'کاربران (User)',
+  athletes: 'ورزشکاران (Athlete)',
+  venueOwners: 'صاحبان سالن (VenueOwner)',
+  venues: 'سالن‌ها (Venue)',
+  timeSlots: 'سانس‌ها (TimeSlot)',
+  bookings: 'رزروها (Booking)',
+  payments: 'پرداخت‌ها (Payment)',
+  paymentReceipts: 'رسیدها (PaymentReceipt)',
+  notifications: 'اعلان‌ها (Notification)',
+};
+
+function renderDbDebug(db){
+  const statGrid = document.getElementById('statGrid');
+  statGrid.innerHTML = `
+    <div class="stat-card"><div class="num">${db.venues.length}</div><div class="label">سالن</div></div>
+    <div class="stat-card"><div class="num">${db.timeSlots.length}</div><div class="label">سانس</div></div>
+    <div class="stat-card"><div class="num">${db.bookings.length}</div><div class="label">رزرو</div></div>
+  `;
+
+  const tablesCard = document.getElementById('tablesCard');
+  tablesCard.innerHTML = Object.keys(TABLE_LABELS).map(key => `
+    <div class="row">
+      <span class="k">${TABLE_LABELS[key]}</span>
+      <span class="v">${db[key].length} رکورد</span>
+    </div>
+  `).join('') + `<div class="row"><span class="k">ایجاد شده در</span><span class="v">${new Date(db.meta.createdAt).toLocaleString('fa-IR')}</span></div>`;
+
+  document.getElementById('jsonPreview').textContent = JSON.stringify(db, null, 2);
+}
+
+/* ==========================================================
+   فاز ۳: احراز هویت (Authentication)
+   - Login مدیر / صاحب سالن با username+password
+   - ثبت ساده ورزشکار با name+phone (بدون رمز عبور)
+   - Session با localStorage (شبیه‌سازی Token)
+   - Logout
+   - Route Protection بر اساس role
+   ========================================================== */
+
+const SESSION_KEY = 'venue_booking_session_v1';
+
+// session = { type: 'athlete'|'owner'|'admin', id, name, role? }
+function getSession(){
+  const raw = localStorage.getItem(SESSION_KEY);
+  if(!raw) return null;
+  try{ return JSON.parse(raw); }catch(e){ return null; }
+}
+
+function setSession(session){
+  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+}
+
+function clearSession(){
+  localStorage.removeItem(SESSION_KEY);
+}
+
+function logout(){
+  clearSession();
+  authState.activeTab = 'owner';
+  authState.error = '';
+  renderApp();
+}
+
+// ---------- ورود صاحب سالن / مدیر (username + password) ----------
+function loginWithPassword(username, password, expectedRole){
+  const db = ensureDB();
+  const user = db.users.find(u => u.username === username && u.role === expectedRole);
+  if(!user){
+    return { ok:false, error: 'نام کاربری یافت نشد.' };
+  }
+  if(user.passwordHash !== simpleHash(password)){
+    return { ok:false, error: 'ورود ناموفق بود. رمز عبور اشتباه است.' };
+  }
+
+  let displayName = user.username;
+  if(user.role === 'owner'){
+    const owner = db.venueOwners.find(o => o.userId === user.id);
+    if(owner) displayName = owner.fullName;
+  } else if(user.role === 'admin'){
+    displayName = 'مدیر اصلی';
+  }
+
+  setSession({ type: user.role, id: user.id, name: displayName });
+  return { ok:true };
+}
+
+// ---------- ثبت/ورود ساده ورزشکار (name + phone) ----------
+function loginOrRegisterAthlete(name, phone){
+  if(!name || name.trim().length < 2){
+    return { ok:false, error: 'نام باید حداقل ۲ حرف باشد.' };
+  }
+  const phoneClean = phone.trim();
+  if(!/^09\d{9}$/.test(phoneClean)){
+    return { ok:false, error: 'شماره همراه معتبر نیست (مثال: 09123456789).' };
+  }
+
+  const db = ensureDB();
+  let athlete = db.athletes.find(a => a.phone === phoneClean);
+  if(!athlete){
+    athlete = {
+      id: nextId(db, 'athletes'),
+      name: name.trim(),
+      phone: phoneClean,
+      createdAt: new Date().toISOString()
+    };
+    db.athletes.push(athlete);
+    saveDB(db);
+  }
+
+  setSession({ type:'athlete', id: athlete.id, name: athlete.name });
+  return { ok:true };
+}
+
+// ---------- Route Protection ----------
+// بررسی می‌کند که سشن فعلی مجاز به دیدن یک صفحه با role مشخص هست یا نه
+function requireRole(allowedRoles){
+  const session = getSession();
+  if(!session) return { ok:false, reason:'no_session' };
+  if(!allowedRoles.includes(session.type)) return { ok:false, reason:'wrong_role' };
+  return { ok:true, session };
+}
+
+// ---------- state محلی صفحه ورود ----------
+const authState = {
+  activeTab: 'owner', // 'owner' | 'admin' | 'athlete'
+  error: ''
+};
+
+function switchAuthTab(tab){
+  authState.activeTab = tab;
+  authState.error = '';
+  renderApp();
+}
+
+function handleOwnerAdminSubmit(role){
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if(!username || !password){
+    authState.error = 'نام کاربری و رمز عبور را وارد کنید.';
+    renderApp();
+    return;
+  }
+  const result = loginWithPassword(username, password, role);
+  if(!result.ok){
+    authState.error = result.error;
+    renderApp();
+    return;
+  }
+  authState.error = '';
+  renderApp();
+}
+
+function handleAthleteSubmit(){
+  const name = document.getElementById('athleteName').value;
+  const phone = document.getElementById('athletePhone').value;
+  const result = loginOrRegisterAthlete(name, phone);
+  if(!result.ok){
+    authState.error = result.error;
+    renderApp();
+    return;
+  }
+  authState.error = '';
+  renderApp();
+}
+
+// ---------- رندر صفحات ورود ----------
+function renderAuthPages(){
+  const c = document.getElementById('authPages');
+
+  const tabs = `
+    <div class="role-tabs">
+      <div class="role-tab ${authState.activeTab==='owner'?'active':''}" onclick="switchAuthTab('owner')">🏢 صاحب سالن</div>
+      <div class="role-tab ${authState.activeTab==='athlete'?'active':''}" onclick="switchAuthTab('athlete')">🏃 ورزشکار</div>
+      <div class="role-tab ${authState.activeTab==='admin'?'active':''}" onclick="switchAuthTab('admin')">🛡️ مدیر</div>
+    </div>
+  `;
+
+  const errorHtml = authState.error
+    ? `<div class="error-msg show">${authState.error}</div>`
+    : `<div class="error-msg"></div>`;
+
+  let formHtml = '';
+  if(authState.activeTab === 'owner' || authState.activeTab === 'admin'){
+    const role = authState.activeTab;
+    const roleLabel = role === 'owner' ? 'صاحب سالن' : 'مدیر';
+    formHtml = `
+      <div class="card">
+        <div class="form-group">
+          <label>نام کاربری</label>
+          <input type="text" id="loginUsername" placeholder="نام کاربری خود را وارد کنید" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label>رمز عبور</label>
+          <input type="password" id="loginPassword" placeholder="رمز عبور" autocomplete="current-password">
+        </div>
+        ${errorHtml}
+        <button class="btn" style="width:100%;" onclick="handleOwnerAdminSubmit('${role}')">ورود به عنوان ${roleLabel}</button>
+        <div class="hint-box">
+          ${role === 'owner'
+            ? '🔑 حساب نمونه برای تست: <b>owner1</b> / <b>owner123</b>'
+            : '🔑 حساب نمونه برای تست: <b>admin</b> / <b>admin123</b>'}
+        </div>
+      </div>
+    `;
+  } else {
+    formHtml = `
+      <div class="card">
+        <div class="form-group">
+          <label>نام و نام خانوادگی</label>
+          <input type="text" id="athleteName" placeholder="مثلاً: علی رضایی">
+        </div>
+        <div class="form-group">
+          <label>شماره همراه</label>
+          <input type="tel" id="athletePhone" placeholder="09123456789" inputmode="numeric">
+        </div>
+        ${errorHtml}
+        <button class="btn" style="width:100%;" onclick="handleAthleteSubmit()">ورود / ادامه</button>
+        <div class="hint-box">
+          🏃 ورزشکار نیاز به رمز عبور ندارد؛ فقط با نام و شماره همراه وارد می‌شوید.
+        </div>
+      </div>
+    `;
+  }
+
+  c.innerHTML = `
+    <div class="section-title">ورود به سامانه</div>
+    ${tabs}
+    ${formHtml}
+  `;
+}
+
+// ---------- رندر صفحه بعد از ورود (Route Protection عملی) ----------
+const roleLabels = { athlete:'ورزشکار', owner:'صاحب سالن', admin:'مدیر اصلی' };
+const roleEmoji = { athlete:'🏃', owner:'🏢', admin:'🛡️' };
+
+function userBarHtml(session){
+  return `
+    <div class="user-bar">
+      <div class="info">
+        <div class="name">${roleEmoji[session.type]} ${session.name}</div>
+        <div class="role">نقش: ${roleLabels[session.type]}</div>
+      </div>
+      <button class="btn danger btn-sm" onclick="logout()">خروج</button>
+    </div>
+  `;
+}
+
+function renderAppPages(session){
+  const c = document.getElementById('appPages');
+
+  // Route Protection: هر role فقط به صفحات مخصوص خودش می‌رسد
+  if(session.type === 'admin'){
+    c.innerHTML = userBarHtml(session) + renderAdminPanel();
+    attachAdminTabHandlers();
+    return;
+  }
+
+  if(session.type === 'owner'){
+    c.innerHTML = userBarHtml(session) + renderOwnerPanel(session);
+    attachOwnerTabHandlers();
+    return;
+  }
+
+  // ورزشکار: هنوز خارج از محدوده این فاز است (فاز ۷)
+  c.innerHTML = userBarHtml(session) + `
+    <div class="card welcome-card">
+      <div class="emoji">✅</div>
+      <h2>ورود موفقیت‌آمیز بود</h2>
+      <p>
+        سشن شما به‌عنوان «${roleLabels[session.type]}» ثبت شد و در حافظه گوشی نگه‌داشته می‌شود.<br>
+        پنل کامل ${roleLabels[session.type]} در فازهای بعدی روی همین ورود ساخته می‌شود.
+      </p>
+    </div>
+  `;
+}
+
+/* ==========================================================
+   فاز ۴: پنل مدیر (Admin Panel)
+   - داشبورد
+   - مدیریت صاحبان سالن (ایجاد/ویرایش/حذف)
+   - مشاهده سالن‌ها
+   - مشاهده ورزشکاران
+   - مشاهده رزروها
+   - مشاهده پرداخت‌ها و رسیدها
+   ========================================================== */
+
+const adminState = {
+  activeTab: 'dashboard', // dashboard | owners | venues | athletes | bookings | payments
+  editingOwnerId: null    // null = create mode, else = edit mode
+};
+
+const ADMIN_TABS = [
+  { id:'dashboard', label:'📊 داشبورد' },
+  { id:'owners', label:'👤 صاحبان سالن' },
+  { id:'venues', label:'🏟️ سالن‌ها' },
+  { id:'athletes', label:'🏃 ورزشکاران' },
+  { id:'bookings', label:'📋 رزروها' },
+  { id:'payments', label:'💳 پرداخت‌ها و رسیدها' },
+];
+
+function switchAdminTab(tab){
+  adminState.activeTab = tab;
+  renderApp();
+}
+
+function renderAdminPanel(){
+  const tabsHtml = `
+    <div class="admin-tabs">
+      ${ADMIN_TABS.map(t => `<div class="admin-tab ${adminState.activeTab===t.id?'active':''}" data-tab="${t.id}">${t.label}</div>`).join('')}
+    </div>
+  `;
+
+  let bodyHtml = '';
+  switch(adminState.activeTab){
+    case 'dashboard': bodyHtml = renderAdminDashboard(); break;
+    case 'owners': bodyHtml = renderAdminOwners(); break;
+    case 'venues': bodyHtml = renderAdminVenues(); break;
+    case 'athletes': bodyHtml = renderAdminAthletes(); break;
+    case 'bookings': bodyHtml = renderAdminBookings(); break;
+    case 'payments': bodyHtml = renderAdminPayments(); break;
+    default: bodyHtml = '';
+  }
+
+  return tabsHtml + bodyHtml;
+}
+
+function attachAdminTabHandlers(){
+  document.querySelectorAll('.admin-tab').forEach(el=>{
+    el.onclick = () => switchAdminTab(el.dataset.tab);
+  });
+}
+
+// ---------- داشبورد ----------
+function renderAdminDashboard(){
+  const db = ensureDB();
+  const activeBookings = db.bookings.filter(b => b.bookingStatus !== 'cancelled').length;
+  const pendingReceipts = db.paymentReceipts.filter(r => r.status === 'pending').length;
+
+  return `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num">${db.venueOwners.length}</div><div class="label">صاحب سالن</div></div>
+      <div class="stat-card"><div class="num">${db.venues.length}</div><div class="label">سالن</div></div>
+      <div class="stat-card"><div class="num">${db.athletes.length}</div><div class="label">ورزشکار</div></div>
+    </div>
+    <div class="stat-grid" style="margin-top:10px;">
+      <div class="stat-card"><div class="num">${activeBookings}</div><div class="label">رزرو فعال</div></div>
+      <div class="stat-card"><div class="num">${db.timeSlots.length}</div><div class="label">سانس</div></div>
+      <div class="stat-card"><div class="num">${pendingReceipts}</div><div class="label">رسید در انتظار</div></div>
+    </div>
+    <div class="section-title">میانبر</div>
+    <div class="card">
+      <div class="row"><span class="k">ایجاد صاحب سالن جدید</span><span class="v"><button class="btn btn-sm" onclick="openOwnerModal()">+ ایجاد</button></span></div>
+      <div class="row"><span class="k">بررسی رسیدهای در انتظار</span><span class="v"><button class="btn secondary btn-sm" onclick="switchAdminTab('payments')">مشاهده</button></span></div>
+    </div>
+  `;
+}
+
+// ---------- مدیریت صاحبان سالن ----------
+function renderAdminOwners(){
+  const db = ensureDB();
+  const owners = db.venueOwners;
+
+  const listHtml = owners.length === 0
+    ? emptyState('👤', 'هنوز هیچ صاحب سالنی ثبت نشده است.')
+    : owners.map(o => {
+        const user = db.users.find(u => u.id === o.userId);
+        const venueCount = db.venues.filter(v => v.ownerId === o.id).length;
+        return `
+          <div class="list-item">
+            <div class="top">
+              <div>
+                <div class="title">${o.fullName}</div>
+                <div class="sub">نام کاربری: ${user ? user.username : '—'}</div>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="chip">${venueCount} سالن</span>
+              <span class="chip">کارت: ${o.cardNumber || 'ثبت‌نشده'}</span>
+            </div>
+            <div class="actions">
+              <button class="btn secondary btn-sm" onclick="openOwnerModal(${o.id})">ویرایش</button>
+              <button class="btn danger btn-sm" onclick="deleteOwner(${o.id})">حذف</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+  return `
+    <div class="btn-row" style="margin-bottom:14px;">
+      <button class="btn" onclick="openOwnerModal()">+ ایجاد صاحب سالن جدید</button>
+    </div>
+    ${listHtml}
+  `;
+}
+
+function emptyState(emoji, text){
+  return `<div class="card empty-state"><span class="emoji">${emoji}</span>${text}</div>`;
+}
+
+// ---- مودال ایجاد/ویرایش صاحب سالن ----
+function openOwnerModal(ownerId){
+  adminState.editingOwnerId = ownerId || null;
+  const overlay = document.getElementById('ownerModalOverlay');
+  const title = document.getElementById('ownerModalTitle');
+  const errorEl = document.getElementById('ownerModalError');
+  errorEl.classList.remove('show');
+  errorEl.textContent = '';
+
+  const fullNameEl = document.getElementById('ownerFullName');
+  const usernameEl = document.getElementById('ownerUsername');
+  const passwordEl = document.getElementById('ownerPassword');
+  const passwordLabel = document.getElementById('ownerPasswordLabel');
+
+  if(ownerId){
+    const db = ensureDB();
+    const owner = db.venueOwners.find(o => o.id === ownerId);
+    const user = db.users.find(u => u.id === owner.userId);
+    title.textContent = 'ویرایش صاحب سالن';
+    fullNameEl.value = owner.fullName;
+    usernameEl.value = user.username;
+    passwordEl.value = '';
+    passwordLabel.textContent = 'رمز عبور جدید (اختیاری — خالی بگذارید تا تغییر نکند)';
+  } else {
+    title.textContent = 'ایجاد صاحب سالن';
+    fullNameEl.value = '';
+    usernameEl.value = '';
+    passwordEl.value = '';
+    passwordLabel.textContent = 'رمز عبور';
+  }
+
+  overlay.classList.remove('hidden');
+}
+
+function closeOwnerModal(){
+  document.getElementById('ownerModalOverlay').classList.add('hidden');
+  adminState.editingOwnerId = null;
+}
+
+function closeOwnerModalOutside(e){
+  if(e.target.id === 'ownerModalOverlay') closeOwnerModal();
+}
+
+function submitOwnerModal(){
+  const fullName = document.getElementById('ownerFullName').value.trim();
+  const username = document.getElementById('ownerUsername').value.trim();
+  const password = document.getElementById('ownerPassword').value;
+  const errorEl = document.getElementById('ownerModalError');
+
+  if(!fullName || fullName.length < 2){
+    errorEl.textContent = 'نام و نام خانوادگی معتبر نیست.';
+    errorEl.classList.add('show');
+    return;
+  }
+  if(!username || username.length < 3){
+    errorEl.textContent = 'نام کاربری باید حداقل ۳ حرف باشد.';
+    errorEl.classList.add('show');
+    return;
+  }
+
+  const db = ensureDB();
+  const editingId = adminState.editingOwnerId;
+
+  // بررسی یکتا بودن username (به‌جز خود همین کاربر در حالت ویرایش)
+  const duplicateUser = db.users.find(u => u.username === username && (!editingId || u.id !== db.venueOwners.find(o=>o.id===editingId).userId));
+  if(duplicateUser){
+    errorEl.textContent = 'این نام کاربری قبلاً استفاده شده است.';
+    errorEl.classList.add('show');
+    return;
+  }
+
+  if(editingId){
+    // ویرایش
+    const owner = db.venueOwners.find(o => o.id === editingId);
+    const user = db.users.find(u => u.id === owner.userId);
+    owner.fullName = fullName;
+    user.username = username;
+    if(password && password.length > 0){
+      if(password.length < 4){
+        errorEl.textContent = 'رمز عبور باید حداقل ۴ کاراکتر باشد.';
+        errorEl.classList.add('show');
+        return;
+      }
+      user.passwordHash = simpleHash(password);
+    }
+  } else {
+    // ایجاد
+    if(!password || password.length < 4){
+      errorEl.textContent = 'رمز عبور باید حداقل ۴ کاراکتر باشد.';
+      errorEl.classList.add('show');
+      return;
+    }
+    const userId = nextId(db, 'users');
+    db.users.push({
+      id: userId, role: 'owner', username: username,
+      passwordHash: simpleHash(password), createdAt: new Date().toISOString()
+    });
+    db.venueOwners.push({
+      id: nextId(db, 'venueOwners'), userId: userId, fullName: fullName,
+      cardNumber: '', createdAt: new Date().toISOString()
+    });
+  }
+
+  saveDB(db);
+  closeOwnerModal();
+  renderApp();
+}
+
+function deleteOwner(ownerId){
+  const db = ensureDB();
+  const venueCount = db.venues.filter(v => v.ownerId === ownerId).length;
+  if(venueCount > 0){
+    alert('این صاحب سالن دارای ' + venueCount + ' سالن است. ابتدا سالن‌های او را حذف یا منتقل کنید.');
+    return;
+  }
+  if(!confirm('آیا از حذف این صاحب سالن مطمئن هستید؟')) return;
+
+  const owner = db.venueOwners.find(o => o.id === ownerId);
+  db.users = db.users.filter(u => u.id !== owner.userId);
+  db.venueOwners = db.venueOwners.filter(o => o.id !== ownerId);
+  saveDB(db);
+  renderApp();
+}
+
+// ---------- مشاهده سالن‌ها ----------
+function renderAdminVenues(){
+  const db = ensureDB();
+  const venues = db.venues;
+
+  if(venues.length === 0) return emptyState('🏟️', 'هنوز هیچ سالنی ثبت نشده است.');
+
+  return venues.map(v => {
+    const owner = db.venueOwners.find(o => o.id === v.ownerId);
+    const slotCount = db.timeSlots.filter(t => t.venueId === v.id).length;
+    return `
+      <div class="list-item">
+        <div class="top">
+          <div>
+            <div class="title">${v.name}</div>
+            <div class="sub">${v.address || 'بدون آدرس'}</div>
+          </div>
+        </div>
+        <div class="meta-row">
+          <span class="chip">صاحب: ${owner ? owner.fullName : '—'}</span>
+          <span class="chip">${Number(v.price).toLocaleString('fa-IR')} تومان</span>
+          <span class="chip">${slotCount} سانس</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ---------- مشاهده ورزشکاران ----------
+function renderAdminAthletes(){
+  const db = ensureDB();
+  const athletes = db.athletes;
+
+  if(athletes.length === 0) return emptyState('🏃', 'هنوز هیچ ورزشکاری ثبت‌نام نکرده است.');
+
+  return athletes.map(a => {
+    const bookingCount = db.bookings.filter(b => b.athleteId === a.id).length;
+    return `
+      <div class="list-item">
+        <div class="top">
+          <div>
+            <div class="title">${a.name}</div>
+            <div class="sub">${a.phone}</div>
+          </div>
+        </div>
+        <div class="meta-row">
+          <span class="chip">${bookingCount} رزرو</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ---------- مشاهده رزروها ----------
+const BOOKING_STATUS_LABELS = { temporary:'موقت', confirmed:'تأییدشده', cancelled:'لغوشده' };
+const PAYMENT_STATUS_LABELS = { waiting_receipt:'در انتظار رسید', receipt_submitted:'رسید ارسال‌شده', receipt_approved:'رسید تأییدشده', receipt_rejected:'رسید ردشده' };
+
+function renderAdminBookings(){
+  const db = ensureDB();
+  const bookings = db.bookings;
+
+  if(bookings.length === 0) return emptyState('📋', 'هنوز هیچ رزروی ثبت نشده است.');
+
+  return bookings.map(b => {
+    const athlete = db.athletes.find(a => a.id === b.athleteId);
+    const venue = db.venues.find(v => v.id === b.venueId);
+    const slot = db.timeSlots.find(t => t.id === b.timeSlotId);
+    return `
+      <div class="list-item">
+        <div class="top">
+          <div>
+            <div class="title">${venue ? venue.name : '—'}</div>
+            <div class="sub">${athlete ? athlete.name : '—'} | ${slot ? slot.date + ' ساعت ' + slot.startTime : '—'}</div>
+          </div>
+        </div>
+        <div class="meta-row">
+          <span class="chip status-${b.bookingStatus}">${BOOKING_STATUS_LABELS[b.bookingStatus]}</span>
+          <span class="chip pay-${b.paymentStatus}">${PAYMENT_STATUS_LABELS[b.paymentStatus]}</span>
+          <span class="chip">${Number(b.price).toLocaleString('fa-IR')} تومان</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ---------- مشاهده پرداخت‌ها و رسیدها ----------
+function renderAdminPayments(){
+  const db = ensureDB();
+  const receipts = db.paymentReceipts;
+
+  if(receipts.length === 0) return emptyState('💳', 'هنوز هیچ رسیدی ارسال نشده است.');
+
+  return receipts.map(r => {
+    const booking = db.bookings.find(b => b.id === r.bookingId);
+    const athlete = booking ? db.athletes.find(a => a.id === booking.athleteId) : null;
+    const venue = booking ? db.venues.find(v => v.id === booking.venueId) : null;
+    return `
+      <div class="list-item">
+        <div class="top">
+          <div>
+            <div class="title">${venue ? venue.name : '—'}</div>
+            <div class="sub">${athlete ? athlete.name : '—'} | ارسال: ${new Date(r.submittedAt).toLocaleDateString('fa-IR')}</div>
+          </div>
+        </div>
+        <div class="meta-row">
+          <span class="chip pay-receipt_${r.status === 'pending' ? 'submitted' : r.status}">${r.status === 'pending' ? 'در انتظار بررسی' : (r.status === 'approved' ? 'تأییدشده' : 'ردشده')}</span>
+          ${booking ? `<span class="chip">${Number(booking.price).toLocaleString('fa-IR')} تومان</span>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ---------- Route Guard نمونه: تلاش برای دسترسی غیرمجاز ----------
+// این تابع صرفاً برای نمایش/تست منطق Authorization استفاده می‌شود
+function testUnauthorizedAccess(allowedRoles){
+  const result = requireRole(allowedRoles);
+  if(!result.ok){
+    if(result.reason === 'no_session') return 'دسترسی غیرمجاز است. ابتدا وارد شوید.';
+    if(result.reason === 'wrong_role') return 'دسترسی غیرمجاز است. نقش شما اجازه دسترسی به این بخش را ندارد.';
+  }
+  return 'دسترسی مجاز است.';
+}
+
+// ---------- رندر اصلی ----------
+function renderApp(){
+  const db = ensureDB();
+  const session = getSession();
+
+  const authPagesEl = document.getElementById('authPages');
+  const appPagesEl = document.getElementById('appPages');
+  const dbDebugEl = document.getElementById('dbDebugSection');
+
+  if(!session){
+    authPagesEl.classList.remove('hidden');
+    appPagesEl.classList.add('hidden');
+    dbDebugEl.classList.add('hidden');
+    renderAuthPages();
+  } else {
+    authPagesEl.classList.add('hidden');
+    appPagesEl.classList.remove('hidden');
+    renderAppPages(session);
+
+    // پنل دیباگ دیتابیس فقط برای مدیر قابل مشاهده است (Route Protection عملی)
+    if(session.type === 'admin'){
+      dbDebugEl.classList.remove('hidden');
+      renderDbDebug(db);
+    } else {
+      dbDebugEl.classList.add('hidden');
+    }
+  }
+}
+
+/* ==========================================================
+   فاز ۵: پنل صاحب سالن (Owner Panel)
+   - داشبورد
+   - مدیریت سالن‌ها (ایجاد/ویرایش)
+   - تصویر سالن
+   - امکانات
+   - شماره کارت
+   ========================================================== */
+
+const ownerState = {
+  activeTab: 'dashboard', // dashboard | venues | slots | card
+  editingVenueId: null,
+  facilityDraft: [],
+  imageDraft: '',
+  slotsVenueId: null // کدام سالن الان در حال مدیریت سانس است
+};
+
+const OWNER_TABS = [
+  { id:'dashboard', label:'📊 داشبورد' },
+  { id:'venues', label:'🏟️ سالن‌های من' },
+  { id:'card', label:'💳 شماره کارت' },
+];
+
+function getOwnerRecordBySession(session){
+  const db = ensureDB();
+  return db.venueOwners.find(o => o.userId === session.id);
+}
+
+function switchOwnerTab(tab){
+  ownerState.activeTab = tab;
+  renderApp();
+}
+
+function renderOwnerPanel(session){
+  const tabsHtml = `
+    <div class="admin-tabs">
+      ${OWNER_TABS.map(t => `<div class="admin-tab ${ownerState.activeTab===t.id?'active':''}" data-tab="${t.id}">${t.label}</div>`).join('')}
+    </div>
+  `;
+
+  let bodyHtml = '';
+  switch(ownerState.activeTab){
+    case 'dashboard': bodyHtml = renderOwnerDashboard(session); break;
+    case 'venues': bodyHtml = renderOwnerVenues(session); break;
+    case 'slots': bodyHtml = renderOwnerSlots(session); break;
+    case 'card': bodyHtml = renderOwnerCard(session); break;
+    default: bodyHtml = '';
+  }
+
+  return tabsHtml + bodyHtml;
+}
+
+function attachOwnerTabHandlers(){
+  document.querySelectorAll('.admin-tab').forEach(el=>{
+    el.onclick = () => switchOwnerTab(el.dataset.tab);
+  });
+}
+
+// ---------- داشبورد صاحب سالن ----------
+function renderOwnerDashboard(session){
+  const db = ensureDB();
+  const owner = getOwnerRecordBySession(session);
+  const myVenues = db.venues.filter(v => v.ownerId === owner.id);
+  const myVenueIds = myVenues.map(v => v.id);
+  const mySlots = db.timeSlots.filter(t => myVenueIds.includes(t.venueId));
+  const myBookings = db.bookings.filter(b => myVenueIds.includes(b.venueId));
+  const activeBookings = myBookings.filter(b => b.bookingStatus !== 'cancelled').length;
+
+  return `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="num">${myVenues.length}</div><div class="label">سالن</div></div>
+      <div class="stat-card"><div class="num">${mySlots.length}</div><div class="label">سانس</div></div>
+      <div class="stat-card"><div class="num">${activeBookings}</div><div class="label">رزرو فعال</div></div>
+    </div>
+    <div class="section-title">میانبر</div>
+    <div class="card">
+      <div class="row"><span class="k">ایجاد سالن جدید</span><span class="v"><button class="btn btn-sm" onclick="openVenueModal()">+ ایجاد</button></span></div>
+      <div class="row"><span class="k">مدیریت شماره کارت</span><span class="v"><button class="btn secondary btn-sm" onclick="switchOwnerTab('card')">مشاهده</button></span></div>
+    </div>
+    ${owner.cardNumber ? '' : `<div class="error-msg show" style="margin-top:14px;">⚠️ هنوز شماره کارت ثبت نکرده‌اید؛ ورزشکاران نمی‌توانند رزرو خود را پرداخت کنند.</div>`}
+  `;
+}
+
+// ---------- سالن‌های من ----------
+function renderOwnerVenues(session){
+  const db = ensureDB();
+  const owner = getOwnerRecordBySession(session);
+  const myVenues = db.venues.filter(v => v.ownerId === owner.id);
+
+  const listHtml = myVenues.length === 0
+    ? emptyState('🏟️', 'هنوز هیچ سالنی اضافه نکرده‌اید.')
+    : myVenues.map(v => {
+        const slotCount = db.timeSlots.filter(t => t.venueId === v.id).length;
+        const imgHtml = v.image
+          ? `<img class="venue-card-image" src="${v.image}" alt="${v.name}">`
+          : `<div class="venue-card-image-placeholder">🏟️</div>`;
+        return `
+          <div class="list-item">
+            ${imgHtml}
+            <div class="top">
+              <div>
+                <div class="title">${v.name}</div>
+                <div class="sub">${v.address || 'بدون آدرس'}</div>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="chip">${Number(v.price).toLocaleString('fa-IR')} تومان</span>
+              <span class="chip">${slotCount} سانس</span>
+              ${(v.facilities||[]).map(f => `<span class="chip">${f}</span>`).join('')}
+            </div>
+            <div class="actions">
+              <button class="btn secondary btn-sm" onclick="openVenueModal(${v.id})">ویرایش</button>
+              <button class="btn secondary btn-sm" onclick="openSlotsView(${v.id})">مدیریت سانس‌ها</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+  return `
+    <div class="btn-row" style="margin-bottom:14px;">
+      <button class="btn" onclick="openVenueModal()">+ ایجاد سالن جدید</button>
+    </div>
+    ${listHtml}
+  `;
+}
+
+/* ==========================================================
+   فاز ۶: مدیریت سانس‌ها (TimeSlot)
+   - ایجاد سانس جدید
+   - ویرایش (حذف مجاز فقط اگر رزرو نشده)
+   - مشاهده سانس‌های یک سالن
+   - جلوگیری از تداخل زمانی (Backend/Data-level)
+   - جلوگیری از رزرو هم‌زمان یک سانس توسط چند ورزشکار
+     (در این فاز با یک قید سطح داده تضمین می‌شود: هر Booking فقط با
+     یک TimeSlot که status آن available است ساخته می‌شود و بلافاصله
+     status آن به reserved تغییر می‌کند — منطق کامل رزرو در فاز ۷)
+   ========================================================== */
+
+const SLOT_STATUS_LABELS = { available: 'آزاد', reserved: 'رزروشده' };
+
+function openSlotsView(venueId){
+  ownerState.slotsVenueId = venueId;
+  ownerState.activeTab = 'slots';
+  renderApp();
+}
+
+function backToVenues(){
+  ownerState.slotsVenueId = null;
+  ownerState.activeTab = 'venues';
+  renderApp();
+}
+
+// بررسی تداخل دو بازه زمانی در یک تاریخ برای یک سالن
+// قانون: اگر (شروع جدید < پایان موجود) و (پایان جدید > شروع موجود) یعنی تداخل دارند
+function hasSlotOverlap(db, venueId, date, startTime, endTime, excludeSlotId){
+  const sameDaySlots = db.timeSlots.filter(t =>
+    t.venueId === venueId &&
+    t.date === date &&
+    t.id !== excludeSlotId
+  );
+  return sameDaySlots.some(t => (startTime < t.endTime) && (endTime > t.startTime));
+}
+
+function renderOwnerSlots(session){
+  const db = ensureDB();
+  const owner = getOwnerRecordBySession(session);
+  const venue = db.venues.find(v => v.id === ownerState.slotsVenueId && v.ownerId === owner.id);
+
+  if(!venue){
+    return `<div class="error-msg show">دسترسی غیرمجاز است.</div><div class="back-link" onclick="backToVenues()">→ بازگشت به سالن‌های من</div>`;
+  }
+
+  const slots = db.timeSlots
+    .filter(t => t.venueId === venue.id)
+    .sort((a,b) => (a.date + a.startTime).localeCompare(b.date + b.startTime));
+
+  const slotsHtml = slots.length === 0
+    ? emptyState('🕒', 'هنوز هیچ سانسی برای این سالن ثبت نشده است.')
+    : slots.map(t => `
+        <div class="slot-row">
+          <div class="info">
+            <div class="date">${t.date}</div>
+            <div class="time">${t.startTime} — ${t.endTime}</div>
+          </div>
+          <div class="side">
+            <span class="chip ${t.status==='available' ? 'status-confirmed' : 'status-temporary'}">${SLOT_STATUS_LABELS[t.status]}</span>
+            ${t.status === 'available'
+              ? `<button class="btn danger btn-sm" onclick="deleteSlot(${t.id})">حذف</button>`
+              : ``}
+          </div>
+        </div>
+      `).join('');
+
+  return `
+    <div class="back-link" onclick="backToVenues()">→ بازگشت به سالن‌های من</div>
+    <div class="section-title">سانس‌های «${venue.name}»</div>
+
+    <div class="card">
+      <div class="form-group">
+        <label>تاریخ</label>
+        <input type="date" id="slotDate">
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>ساعت شروع</label>
+          <input type="time" id="slotStart">
+        </div>
+        <div class="form-group">
+          <label>ساعت پایان</label>
+          <input type="time" id="slotEnd">
+        </div>
+      </div>
+      <div class="error-msg" id="slotError"></div>
+      <button class="btn" style="width:100%;" onclick="addSlot(${venue.id})">+ افزودن سانس</button>
+    </div>
+
+    <div class="section-title">لیست سانس‌ها</div>
+    ${slotsHtml}
+  `;
+}
+
+function addSlot(venueId){
+  const date = document.getElementById('slotDate').value;
+  const start = document.getElementById('slotStart').value;
+  const end = document.getElementById('slotEnd').value;
+  const errorEl = document.getElementById('slotError');
+  errorEl.classList.remove('show');
+
+  if(!date){
+    errorEl.textContent = 'تاریخ سانس را انتخاب کنید.';
+    errorEl.classList.add('show');
+    return;
+  }
+  if(!start || !end){
+    errorEl.textContent = 'ساعت شروع و پایان را وارد کنید.';
+    errorEl.classList.add('show');
+    return;
+  }
+  if(start >= end){
+    errorEl.textContent = 'ساعت پایان باید بعد از ساعت شروع باشد.';
+    errorEl.classList.add('show');
+    return;
+  }
+
+  const db = ensureDB();
+
+  // جلوگیری از تداخل سانس‌ها (سطح Backend/Data، نه فقط UI)
+  if(hasSlotOverlap(db, venueId, date, start, end, null)){
+    errorEl.textContent = 'زمان موردنظر دیگر آزاد نیست. این بازه با سانس دیگری تداخل دارد.';
+    errorEl.classList.add('show');
+    return;
+  }
+
+  db.timeSlots.push({
+    id: nextId(db, 'timeSlots'), venueId: venueId, date: date,
+    startTime: start, endTime: end, status: 'available'
+  });
+  saveDB(db);
+  renderApp();
+}
+
+function deleteSlot(slotId){
+  const db = ensureDB();
+  const slot = db.timeSlots.find(t => t.id === slotId);
+  if(!slot) return;
+
+  // هرگز نباید سانسی که رزرو شده حذف شود (جلوگیری از رزرو هم‌زمان/ناسازگاری داده)
+  if(slot.status === 'reserved'){
+    alert('این سانس رزرو شده است و قابل حذف نیست.');
+    return;
+  }
+  if(!confirm('آیا از حذف این سانس مطمئن هستید؟')) return;
+
+  db.timeSlots = db.timeSlots.filter(t => t.id !== slotId);
+  saveDB(db);
+  renderApp();
+}
+
+// ---------- قید سطح داده برای جلوگیری از رزرو هم‌زمان یک سانس ----------
+// این تابع در فاز ۷ توسط فرآیند رزرو ورزشکار فراخوانی می‌شود.
+// این‌جا فقط به‌عنوان بخشی از لایه داده فاز ۶ (Constraint سطح Backend) تعریف می‌شود
+// تا اطمینان حاصل شود کنترل تداخل رزرو صرفاً به Frontend وابسته نیست.
+function reserveTimeSlotAtomic(db, timeSlotId){
+  const slot = db.timeSlots.find(t => t.id === timeSlotId);
+  if(!slot) return { ok:false, error:'سانس موردنظر یافت نشد.' };
+  if(slot.status !== 'available') return { ok:false, error:'زمان موردنظر دیگر آزاد نیست.' };
+  slot.status = 'reserved';
+  return { ok:true };
+}
+
+// ---- مودال ایجاد/ویرایش سالن ----
+function openVenueModal(venueId){
+  ownerState.editingVenueId = venueId || null;
+  const overlay = document.getElementById('venueModalOverlay');
+  const title = document.getElementById('venueModalTitle');
+  const errorEl = document.getElementById('venueModalError');
+  errorEl.classList.remove('show');
+  errorEl.textContent = '';
+
+  const nameEl = document.getElementById('venueName');
+  const addressEl = document.getElementById('venueAddress');
+  const phoneEl = document.getElementById('venuePhone');
+  const priceEl = document.getElementById('venuePrice');
+  const imgPreview = document.getElementById('venueImagePreview');
+  const imgPlaceholder = document.getElementById('venueImagePlaceholder');
+
+  if(venueId){
+    const db = ensureDB();
+    const venue = db.venues.find(v => v.id === venueId);
+    title.textContent = 'ویرایش سالن';
+    nameEl.value = venue.name;
+    addressEl.value = venue.address;
+    phoneEl.value = venue.phone;
+    priceEl.value = venue.price;
+    ownerState.facilityDraft = [...(venue.facilities || [])];
+    ownerState.imageDraft = venue.image || '';
+  } else {
+    title.textContent = 'ایجاد سالن جدید';
+    nameEl.value = '';
+    addressEl.value = '';
+    phoneEl.value = '';
+    priceEl.value = '';
+    ownerState.facilityDraft = [];
+    ownerState.imageDraft = '';
+  }
+
+  if(ownerState.imageDraft){
+    imgPreview.src = ownerState.imageDraft;
+    imgPreview.classList.remove('hidden');
+    imgPlaceholder.classList.add('hidden');
+  } else {
+    imgPreview.classList.add('hidden');
+    imgPlaceholder.classList.remove('hidden');
+  }
+
+  renderFacilityTags();
+  overlay.classList.remove('hidden');
+}
+
+function closeVenueModal(){
+  document.getElementById('venueModalOverlay').classList.add('hidden');
+  ownerState.editingVenueId = null;
+}
+
+function closeVenueModalOutside(e){
+  if(e.target.id === 'venueModalOverlay') closeVenueModal();
+}
+
+// اعتبارسنجی ساده آپلود فایل: فقط تصویر و حداکثر حجم مشخص
+function handleVenueImageSelect(event){
+  const file = event.target.files[0];
+  if(!file) return;
+
+  if(!file.type.startsWith('image/')){
+    document.getElementById('venueModalError').textContent = 'فقط فایل تصویر مجاز است.';
+    document.getElementById('venueModalError').classList.add('show');
+    return;
+  }
+  const maxSizeBytes = 3 * 1024 * 1024; // 3MB
+  if(file.size > maxSizeBytes){
+    document.getElementById('venueModalError').textContent = 'حجم تصویر نباید بیشتر از ۳ مگابایت باشد.';
+    document.getElementById('venueModalError').classList.add('show');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    ownerState.imageDraft = e.target.result;
+    const imgPreview = document.getElementById('venueImagePreview');
+    const imgPlaceholder = document.getElementById('venueImagePlaceholder');
+    imgPreview.src = ownerState.imageDraft;
+    imgPreview.classList.remove('hidden');
+    imgPlaceholder.classList.add('hidden');
+    document.getElementById('venueModalError').classList.remove('show');
+  };
+  reader.readAsDataURL(file);
+}
+
+function addFacilityTag(){
+  const input = document.getElementById('venueFacilityInput');
+  const val = input.value.trim();
+  if(!val) return;
+  if(ownerState.facilityDraft.includes(val)){
+    input.value = '';
+    return;
+  }
+  ownerState.facilityDraft.push(val);
+  input.value = '';
+  renderFacilityTags();
+}
+
+function removeFacilityTag(index){
+  ownerState.facilityDraft.splice(index, 1);
+  renderFacilityTags();
+}
+
+function renderFacilityTags(){
+  const c = document.getElementById('venueFacilityTags');
+  c.innerHTML = ownerState.facilityDraft.map((f, i) => `
+    <span class="facility-tag">${f} <span class="remove" onclick="removeFacilityTag(${i})">×</span></span>
+  `).join('');
+}
+
+function submitVenueModal(){
+  const name = document.getElementById('venueName').value.trim();
+  const address = document.getElementById('venueAddress').value.trim();
+  const phone = document.getElementById('venuePhone').value.trim();
+  const priceRaw = document.getElementById('venuePrice').value;
+  const errorEl = document.getElementById('venueModalError');
+
+  if(!name || name.length < 2){
+    errorEl.textContent = 'نام سالن معتبر نیست.';
+    errorEl.classList.add('show');
+    return;
+  }
+  if(!address || address.length < 5){
+    errorEl.textContent = 'آدرس معتبر نیست.';
+    errorEl.classList.add('show');
+    return;
+  }
+  if(!phone || phone.length < 8){
+    errorEl.textContent = 'شماره تماس معتبر نیست.';
+    errorEl.classList.add('show');
+    return;
+  }
+  const price = Number(priceRaw);
+  if(!priceRaw || isNaN(price) || price <= 0){
+    errorEl.textContent = 'قیمت سانس باید عددی معتبر و بزرگ‌تر از صفر باشد.';
+    errorEl.classList.add('show');
+    return;
+  }
+
+  const session = getSession();
+  const owner = getOwnerRecordBySession(session);
+  const db = ensureDB();
+
+  if(ownerState.editingVenueId){
+    const venue = db.venues.find(v => v.id === ownerState.editingVenueId && v.ownerId === owner.id);
+    if(!venue){
+      errorEl.textContent = 'دسترسی غیرمجاز است.';
+      errorEl.classList.add('show');
+      return;
+    }
+    venue.name = name;
+    venue.address = address;
+    venue.phone = phone;
+    venue.price = price;
+    venue.image = ownerState.imageDraft;
+    venue.facilities = [...ownerState.facilityDraft];
+  } else {
+    db.venues.push({
+      id: nextId(db, 'venues'), ownerId: owner.id, name, address, phone, price,
+      image: ownerState.imageDraft, facilities: [...ownerState.facilityDraft],
+      createdAt: new Date().toISOString()
+    });
+  }
+
+  saveDB(db);
+  closeVenueModal();
+  renderApp();
+}
+
+// ---------- شماره کارت ----------
+function renderOwnerCard(session){
+  const owner = getOwnerRecordBySession(session);
+  return `
+    <div class="card">
+      <div class="form-group">
+        <label>شماره کارت بانکی</label>
+        <input type="text" id="ownerCardInput" value="${owner.cardNumber || ''}" placeholder="6037-XXXX-XXXX-XXXX" inputmode="numeric">
+      </div>
+      <div class="error-msg" id="cardError"></div>
+      <button class="btn" style="width:100%;" onclick="saveOwnerCard()">ذخیره شماره کارت</button>
+      <div class="hint-box">
+        💳 این شماره کارت هنگام رزرو به ورزشکاران نمایش داده می‌شود تا مبلغ سانس را واریز کنند.
+      </div>
+    </div>
+  `;
+}
+
+function saveOwnerCard(){
+  const val = document.getElementById('ownerCardInput').value.trim();
+  const errorEl = document.getElementById('cardError');
+  const digitsOnly = val.replace(/[-\s]/g, '');
+
+  if(!/^\d{16}$/.test(digitsOnly)){
+    errorEl.textContent = 'شماره کارت باید ۱۶ رقم باشد.';
+    errorEl.classList.add('show');
+    return;
+  }
+
+  const session = getSession();
+  const db = ensureDB();
+  const owner = db.venueOwners.find(o => o.userId === session.id);
+  owner.cardNumber = val;
+  saveDB(db);
+  errorEl.classList.remove('show');
+  renderApp();
+}
+
+renderApp();
+</script>
+
+</body>
+</html>
